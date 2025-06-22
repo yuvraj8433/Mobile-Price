@@ -10,20 +10,23 @@ from sklearn.metrics import classification_report, accuracy_score
 # Load your dataset
 data = pd.read_csv("data/mobile_data.csv")
 
-# Split into features and target
-X = data.drop("price_range", axis=1)
+# ✅ Use only selected important features
+selected_features = ["battery_power", "ram", "px_height", "px_width",
+                     "four_g", "touch_screen", "wifi"]
+
+X = data[selected_features]
 y = data["price_range"]
 
 # Check class balance
 print("Class distribution:")
 print(y.value_counts(), "\n")
 
-# Split with stratification
+# Train-test split with stratification
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, stratify=y, random_state=42
 )
 
-# Train a more powerful model
+# Train the model
 model = RandomForestClassifier(
     n_estimators=300,
     max_depth=20,
@@ -33,14 +36,14 @@ model = RandomForestClassifier(
 
 model.fit(X_train, y_train)
 
-# Evaluation
+# Evaluate
 y_pred = model.predict(X_test)
 
 print("✅ Model Performance on Test Set:\n")
 print(classification_report(y_test, y_pred, target_names=["Low", "Medium", "High", "Very High"]))
 print("Accuracy:", accuracy_score(y_test, y_pred))
 
-# Save the model
+# Save model
 os.makedirs("model", exist_ok=True)
 with open("model/model.pkl", "wb") as f:
     pickle.dump(model, f)
